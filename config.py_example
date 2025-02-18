@@ -1,0 +1,3 @@
+# CREATE YOUR OWN config.py FILE USING THIS EXAMPLE :
+
+BOT_TOKEN = "your_telegram_bot_token"
