@@ -1,6 +1,5 @@
 import logging
 import os
-import tempfile
 import asyncio
 from aiogram import Bot, Dispatcher, types, Router
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
@@ -101,51 +100,29 @@ async def set_conversion_type(message: types.Message):
     await message.answer(MESSAGES[lang]["send_file"])
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_PATH = os.path.join(BASE_DIR, "downloads")
+os.makedirs(SAVE_PATH, exist_ok=True)
+
+
 @router.message(lambda message: message.document is not None)
 async def handle_document(message: types.Message):
-    user_id = message.from_user.id
-    lang = user_states.get(user_id, {}).get("language", "en")
-    conversion_type = user_states.get(user_id, {}).get("conversion")
-
-    if not conversion_type:
-        await message.answer(MESSAGES[lang]["choose_conversion"])
-        return
-
     file_info = await bot.get_file(message.document.file_id)
-    file_extension = message.document.file_name.split(".")[-1].lower()
+    file_name = message.document.file_name
 
-    if conversion_type == "word_to_pdf" and file_extension != "docx":
-        await message.answer(MESSAGES[lang]["error_file"])
-        return
-    if conversion_type == "pdf_to_word" and file_extension != "pdf":
-        await message.answer(MESSAGES[lang]["error_file"])
-        return
+    file_path = os.path.join(SAVE_PATH, file_name)
 
-    await message.answer(MESSAGES[lang]["converting"])
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_file:
-        await bot.download_file(file_info.file_path, temp_file.name)
-        temp_file_path = temp_file.name
-
-    output_file_path = temp_file_path.replace(f".{file_extension}",
-                                              ".pdf" if conversion_type == "word_to_pdf" else ".docx")
+    logging.info(f" Downloading file: {file_name}")
+    logging.info(f"Telegram file path: {file_info.file_path}")
+    logging.info(f"Saving to: {file_path}")
 
     try:
-        if conversion_type == "word_to_pdf":
-            convert_docx_to_pdf(temp_file_path, output_file_path)
-        else:
-            convert_pdf_to_docx(temp_file_path, output_file_path)
-
-        with open(output_file_path, "rb") as doc:
-            await message.answer_document(doc, caption=MESSAGES[lang]["success"])
-
+        await bot.download_file(file_info.file_path, file_path)
+        logging.info(f"File saved successfully: {file_path}")
+        await message.answer(f"File successfully saved at: {file_path}")
     except Exception as e:
-        logging.error(f"Error: {e}")
-        await message.answer(MESSAGES[lang]["error"])
-
-    finally:
-        os.remove(temp_file_path)
-        os.remove(output_file_path)
+        logging.error(f"Error downloading file: {e}")
+        await message.answer(f"Error: {e}")
 
 
 def convert_docx_to_pdf(input_file, output_path):

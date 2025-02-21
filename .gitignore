@@ -13,7 +13,12 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-downloads/
+
+# Ignore all files inside downloads/ but keep the folder
+downloads/*
+!downloads/.gitkeep
+
+
 eggs/
 .eggs/
 lib/
