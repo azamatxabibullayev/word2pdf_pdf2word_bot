@@ -55,14 +55,24 @@ MESSAGES = {
     }
 }
 
-lang_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-for code, name in LANGUAGES.items():
-    lang_keyboard.add(KeyboardButton(name))
+lang_keyboard = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text=name)] for name in LANGUAGES.values()],
+    resize_keyboard=True
+)
 
 convert_keyboard = {
-    "uz": ReplyKeyboardMarkup(resize_keyboard=True).add("Word ➡ PDF", "PDF ➡ Word"),
-    "en": ReplyKeyboardMarkup(resize_keyboard=True).add("Word ➡ PDF", "PDF ➡ Word"),
-    "ru": ReplyKeyboardMarkup(resize_keyboard=True).add("Word ➡ PDF", "PDF ➡ Word"),
+    "uz": ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Word ➡ PDF"), KeyboardButton(text="PDF ➡ Word")]],
+        resize_keyboard=True
+    ),
+    "en": ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Word ➡ PDF"), KeyboardButton(text="PDF ➡ Word")]],
+        resize_keyboard=True
+    ),
+    "ru": ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Word ➡ PDF"), KeyboardButton(text="PDF ➡ Word")]],
+        resize_keyboard=True
+    ),
 }
 
 
